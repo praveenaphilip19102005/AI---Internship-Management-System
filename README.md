@@ -1,1 +1,1 @@
-# AI---Internship-Management-System
+# AI-Internship-Management-System
