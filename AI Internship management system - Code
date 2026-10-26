@@ -1,0 +1,265 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>InternPilot AI - Internship Management</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#f4f8f5;color:#18332d}
+header{background:linear-gradient(110deg,#103d36,#16836d);color:white;padding:22px 4%;display:flex;justify-content:space-between;align-items:center}
+header h2{margin:0}
+nav{display:flex;gap:8px;flex-wrap:wrap;padding:12px 3%;background:#eaf3ee;border-bottom:1px solid #d7e6dd}
+nav button{border:0;background:transparent;padding:12px;border-radius:9px;cursor:pointer;color:#285548;font-weight:bold}
+nav button.active,nav button:hover{background:#ccebdd;color:#07594b}
+main{padding:25px 4%;max-width:1400px;margin:auto}
+.page{display:none}
+.page.active{display:block}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:15px;margin:20px 0}
+.card,.panel{background:white;border:1px solid #dfeae3;border-radius:15px;padding:20px;margin-bottom:18px;box-shadow:0 5px 20px #214c3810}
+.card h2{color:#116b5b}
+label{display:block;font-weight:bold;font-size:13px;margin:12px 0 6px}
+input,select,textarea{width:100%;padding:11px;border:1px solid #d5e5dc;border-radius:8px;font:inherit}
+textarea{min-height:100px}
+.action{background:#116b5b;color:white;border:0;border-radius:8px;padding:11px 16px;margin-top:12px;cursor:pointer;font-weight:bold}
+table{width:100%;border-collapse:collapse;min-width:600px}
+th,td{text-align:left;padding:12px;border-bottom:1px solid #e5eee8;font-size:13px}
+.tablewrap{overflow:auto}
+.status{background:#d8f3e8;color:#07594b;padding:5px 8px;border-radius:7px}
+.message{padding:12px;background:#eff6f1;border-radius:10px;margin:10px 0;white-space:pre-wrap}
+.small{font-size:12px;color:#70857c}
+@media(max-width:600px){header{align-items:flex-start;gap:10px;flex-direction:column}nav{gap:3px}nav button{padding:9px;font-size:12px}main{padding:15px}}
+</style>
+</head>
+<body>
+<header>
+  <div><h2>✦ InternPilot AI</h2><p>Internship operations, made simpler</p></div>
+  <span>Prototype Workspace</span>
+</header>
+
+<nav id="navigation">
+  <button class="active" data-page="overview">Overview</button>
+  <button data-page="interns">Intern Directory</button>
+  <button data-page="tasks">Task Management</button>
+  <button data-page="reviews">Reviews & Reminders</button>
+  <button data-page="emails">Email Activity</button>
+  <button data-page="mentor">AI Task Mentor</button>
+</nav>
+
+<main>
+<section class="page active" id="overview">
+  <h1>Internship Command Center</h1>
+  <p>Manage interns, assign work and track review progress.</p>
+  <div class="cards">
+    <div class="card">Total Interns<h2 id="total">100</h2></div>
+    <div class="card">Active Tasks<h2 id="active">0</h2></div>
+    <div class="card">Pending Reviews<h2 id="pending">0</h2></div>
+    <div class="card">Completed Tasks<h2 id="completed">0</h2></div>
+  </div>
+  <div class="panel">
+    <h3>Personalised Learning Sprint</h3>
+    <label>Select intern</label><select id="sprintIntern"></select>
+    <button class="action" id="generateSprint">Generate 3-Day Plan</button>
+    <div id="sprintOutput"></div>
+  </div>
+</section>
+
+<section class="page" id="interns">
+  <h1>Intern Directory</h1>
+  <input id="search" placeholder="Search intern name or ID">
+  <div class="panel tablewrap">
+    <table><thead><tr><th>Name</th><th>ID</th><th>Department</th><th>Task</th><th>Status</th></tr></thead>
+    <tbody id="internRows"></tbody></table>
+    <p id="pageInfo" class="small"></p>
+    <button class="action" id="previous">← Previous</button>
+    <button class="action" id="next">Next →</button>
+  </div>
+  <div class="panel">
+    <h3>Import Intern List</h3>
+    <p class="small">Choose a CSV file with columns: name, department, task.</p>
+    <input type="file" id="csvFile" accept=".csv">
+  </div>
+</section>
+
+<section class="page" id="tasks">
+  <h1>Task Management</h1>
+  <div class="panel">
+    <label>Select intern</label><select id="taskIntern"></select>
+    <label>Task title</label><input id="taskTitle" placeholder="Example: Build a portfolio page">
+    <label>Task description</label><textarea id="taskDescription" placeholder="Explain what the intern needs to do"></textarea>
+    <label>Review date</label><input type="date" id="reviewDate">
+    <label>Review time</label><input type="time" id="reviewTime" value="10:00">
+    <button class="action" id="assignTask">Assign Task</button>
+    <p class="small">This prototype saves task details in the current browser session.</p>
+  </div>
+</section>
+
+<section class="page" id="reviews">
+  <h1>Reviews & Reminders</h1>
+  <div class="panel">
+    <h3>Review Timeline</h3>
+    <div id="reviewLog">No reviews recorded yet.</div>
+  </div>
+  <div class="panel">
+    <label>Select intern</label><select id="reviewIntern"></select>
+    <label>Intern submission / progress</label>
+    <textarea id="submission" placeholder="Paste the intern's work summary here"></textarea>
+    <button class="action" id="analyse">Analyse Submission</button>
+    <div id="analysisOutput"></div>
+  </div>
+</section>
+
+<section class="page" id="emails">
+  <h1>Email Activity</h1>
+  <div class="panel">
+    <h3>Reminder Activity Log</h3>
+    <p class="small">This demo records planned reminders. It does not send actual emails.</p>
+    <div id="emailLog">No email activity yet.</div>
+  </div>
+</section>
+
+<section class="page" id="mentor">
+  <h1>AI Task Mentor</h1>
+  <div class="panel">
+    <label>Select intern</label><select id="mentorIntern"></select>
+    <div id="mentorMessages" class="message">Hello! Select an intern and ask for help with their assigned task.</div>
+    <form id="mentorForm">
+      <label>Your question</label>
+      <input id="mentorQuestion" placeholder="Explain my task step by step">
+      <button class="action">Ask Mentor</button>
+    </form>
+    <p class="small">This is a simple demo mentor, not a live AI API connection.</p>
+  </div>
+</section>
+</main>
+
+<script>
+const interns=Array.from({length:100},(_,n)=>({
+ id:"INT-"+String(n+1).padStart(3,"0"),
+ name:["Rahul Kumar","Priya Sharma","Arun Raj","Meera Rao","Sanjay Sharma","Diya Patel","Naveen Das","Sneha Raj","Harish Iyer","Nila Nair"][n%10]+(n>=10?" "+(Math.floor(n/10)+1):""),
+ department:["Web Development","AI/ML","Data Analytics","Cloud Support","IoT Development","QA Testing"][n%6],
+ task:"Task not assigned",
+ status:"Not Started",
+ review:"Not scheduled"
+}));
+let page=1;
+const pageSize=10;
+const $=id=>document.getElementById(id);
+function selected(id){return interns.find(i=>i.id===$(id).value)||interns[0]}
+function fillSelect(id){$(id).innerHTML=interns.map(i=>`<option value="${i.id}">${i.name} · ${i.id}</option>`).join("")}
+["sprintIntern","taskIntern","reviewIntern","mentorIntern"].forEach(fillSelect);
+
+$("navigation").addEventListener("click",e=>{
+ const btn=e.target.closest("button[data-page]");
+ if(!btn)return;
+ document.querySelectorAll(".page").forEach(p=>p.classList.toggle("active",p.id===btn.dataset.page));
+ document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("active",b===btn));
+ window.scrollTo({top:0,behavior:"smooth"});
+});
+
+function renderInterns(){
+ const q=$("search").value.toLowerCase();
+ const filtered=interns.filter(i=>(i.name+i.id+i.department+i.task).toLowerCase().includes(q));
+ const pages=Math.max(1,Math.ceil(filtered.length/pageSize));
+ page=Math.min(page,pages);
+ const start=(page-1)*pageSize;
+ $("internRows").innerHTML=filtered.slice(start,start+pageSize).map(i=>
+ `<tr><td>${i.name}</td><td>${i.id}</td><td>${i.department}</td><td>${i.task}</td><td><span class="status">${i.status}</span></td></tr>`
+ ).join("");
+ $("pageInfo").textContent=`Showing ${filtered.length?start+1:0}–${Math.min(start+pageSize,filtered.length)} of ${filtered.length} interns · Page ${page}/${pages}`;
+ $("total").textContent=interns.length;
+ $("active").textContent=interns.filter(i=>i.status==="In Progress"||i.status==="Needs Review").length;
+ $("pending").textContent=interns.filter(i=>i.status==="Needs Review").length;
+ $("completed").textContent=interns.filter(i=>i.status==="Completed").length;
+}
+$("search").addEventListener("input",()=>{page=1;renderInterns()});
+$("previous").onclick=()=>{if(page>1)page--;renderInterns()};
+$("next").onclick=()=>{page++;renderInterns()};
+
+function addLog(id,title,description){
+ const box=$(id);
+ if(box.textContent.includes("No reviews")||box.textContent.includes("No email activity"))box.innerHTML="";
+ const item=document.createElement("div");
+ item.className="message";
+ const b=document.createElement("b");b.textContent=title;
+ const p=document.createElement("p");p.textContent=description;
+ item.append(b,p);box.prepend(item);
+}
+
+$("assignTask").onclick=()=>{
+ const i=selected("taskIntern");
+ const title=$("taskTitle").value.trim();
+ const description=$("taskDescription").value.trim();
+ if(!title||!description){alert("Enter task title and description.");return}
+ i.task=title;i.status="In Progress";
+ const date=$("reviewDate").value||"Not scheduled";
+ const time=$("reviewTime").value||"Not scheduled";
+ i.review=date+" "+time;
+ addLog("reviewLog","Task assigned · "+i.name,title+" · Review: "+i.review);
+ addLog("emailLog","Reminder planned · "+i.name,"Task: "+title+" · Review: "+i.review+" · Demo only; no email sent.");
+ renderInterns();
+ alert("Task assigned in demo!");
+};
+
+$("analyse").onclick=()=>{
+ const i=selected("reviewIntern"),s=$("submission").value.trim();
+ if(!s){alert("Enter submission details first.");return}
+ const tips=[];
+ if(s.length<100)tips.push("Add more detail about completed work.");
+ if(!/test|screenshot|evidence|result/i.test(s))tips.push("Include test results or evidence.");
+ if(!/issue|remaining|next step|challenge/i.test(s))tips.push("Mention remaining issues or next steps.");
+ i.status="Needs Review";
+ $("analysisOutput").innerHTML="";
+ const h=document.createElement("h3");h.textContent="Demo review · "+i.name;
+ const p=document.createElement("p");p.textContent=tips.length?tips.join(" "):"Submission looks ready for mentor review. Please verify the work manually.";
+ $("analysisOutput").append(h,p);
+ addLog("reviewLog","Submission analysed · "+i.name,p.textContent);
+ renderInterns();
+};
+
+$("generateSprint").onclick=()=>{
+ const i=selected("sprintIntern");
+ $("sprintOutput").innerHTML="";
+ const h=document.createElement("h3");h.textContent=i.name+"'s 3-day learning plan";
+ const p=document.createElement("p");
+ p.textContent="Day 1: Learn the requirements for "+i.task+". Day 2: Implement a small working version and test it. Day 3: Improve the result, document progress and prepare questions for the mentor.";
+ $("sprintOutput").append(h,p);
+};
+
+$("mentorIntern").addEventListener("change",()=>{
+ $("mentorMessages").textContent="Selected intern: "+selected("mentorIntern").name+". Task: "+selected("mentorIntern").task;
+});
+$("mentorForm").addEventListener("submit",e=>{
+ e.preventDefault();
+ const i=selected("mentorIntern"),q=$("mentorQuestion").value.trim();
+ if(!q)return;
+ $("mentorMessages").textContent="You: "+q+"\n\nMentor: For "+i.name+"'s task (“"+i.task+"”), break the work into small steps, implement one part at a time, test the result, and keep evidence of your progress. Your question: "+q;
+ $("mentorQuestion").value="";
+});
+
+$("csvFile").addEventListener("change",e=>{
+ const file=e.target.files[0];if(!file)return;
+ const reader=new FileReader();
+ reader.onload=()=>{
+  const lines=String(reader.result).split(/\r?\n/).filter(Boolean);
+  const headers=lines.shift().split(",").map(x=>x.trim().toLowerCase());
+  let count=0;
+  lines.forEach(line=>{
+   const values=line.split(",").map(x=>x.trim());
+   const row={};headers.forEach((h,n)=>row[h]=values[n]||"");
+   const name=row.name||row.intern_name;
+   if(!name)return;
+   const id=row.id||row.intern_id||("CSV-"+Date.now()+"-"+count);
+   interns.push({id,name,department:row.department||"General",task:row.task||"Task not assigned",status:row.status||"Not Started",review:row.review_date||"Not scheduled"});
+   count++;
+  });
+  ["sprintIntern","taskIntern","reviewIntern","mentorIntern"].forEach(fillSelect);
+  renderInterns();alert(count+" intern records imported.");
+ };
+ reader.readAsText(file);
+});
+renderInterns();
+</script>
+</body>
+</html>
